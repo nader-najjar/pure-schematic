@@ -53,7 +53,7 @@ Publishing waits for the materializer. It will consume the project's built site 
 **As a human editor, I want to move, connect and label things directly.**
 
 - I can add, move, connect, rename and delete nodes and connections using the visible editor.
-- The local editor fits the loaded diagram initially, with readable labels and no clipped content.
+- The local editor restores the saved pan and zoom; Fit View makes the whole diagram visible on demand.
 - Canceling an edit leaves the document unchanged. Repeated actions do not create accidental duplicates or corrupt connections.
 
 ### 4. Know what is saved (P0)
