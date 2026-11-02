@@ -1,0 +1,12 @@
+{
+  "nodes": [
+    { "id": "idea", "position": { "x": 0, "y": 0 }, "data": { "label": "Shape the idea" } },
+    { "id": "build", "position": { "x": 0, "y": 150 }, "data": { "label": "Make a small change" } },
+    { "id": "review", "position": { "x": 0, "y": 300 }, "data": { "label": "Review together" } }
+  ],
+  "edges": [
+    { "id": "idea-build", "source": "idea", "target": "build" },
+    { "id": "build-review", "source": "build", "target": "review" }
+  ],
+  "viewport": { "x": 0, "y": 0, "zoom": 1 }
+}
