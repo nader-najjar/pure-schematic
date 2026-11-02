@@ -1,33 +1,12 @@
 {
-  "schemaVersion": 1,
-  "title": "From idea to release",
-  "description": "An illustrative workflow for a small project team.",
   "nodes": [
-    {
-      "id": "idea",
-      "position": { "x": 0, "y": 140 },
-      "data": { "label": "Shape the idea", "description": "Agree on the problem and what a good outcome looks like.", "color": "blue" }
-    },
-    {
-      "id": "build",
-      "position": { "x": 340, "y": 140 },
-      "data": { "label": "Make a small change", "description": "Keep the source clear, focused and easy to review.", "color": "purple" }
-    },
-    {
-      "id": "review",
-      "position": { "x": 680, "y": 0 },
-      "data": { "label": "Review together", "description": "Check the behavior and inspect the actual result.", "color": "purple" }
-    },
-    {
-      "id": "release",
-      "position": { "x": 1020, "y": 140 },
-      "data": { "label": "Share the result", "description": "Publish only the work that is ready to be shared.", "color": "green" }
-    }
+    { "id": "idea", "position": { "x": 0, "y": 0 }, "data": { "label": "Shape the idea" } },
+    { "id": "build", "position": { "x": 0, "y": 150 }, "data": { "label": "Make a small change" } },
+    { "id": "review", "position": { "x": 0, "y": 300 }, "data": { "label": "Review together" } }
   ],
   "edges": [
-    { "id": "idea-build", "source": "idea", "target": "build", "label": "agree" },
-    { "id": "build-review", "source": "build", "target": "review", "label": "propose" },
-    { "id": "review-release", "source": "review", "target": "release", "label": "approve" }
+    { "id": "idea-build", "source": "idea", "target": "build" },
+    { "id": "build-review", "source": "build", "target": "review" }
   ],
   "viewport": { "x": 0, "y": 0, "zoom": 1 }
 }

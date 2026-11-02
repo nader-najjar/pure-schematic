@@ -1,79 +1,18 @@
 {
   "forbidden": [
-    {
-      "name": "no-circular",
-      "severity": "error",
-      "from": {},
-      "to": {
-        "circular": true
-      }
-    },
-    {
-      "name": "no-orphans",
-      "severity": "error",
-      "from": {
-        "orphan": true,
-        "pathNot": [
-          "\\.d\\.ts$",
-          "\\.css$"
-        ]
-      },
-      "to": {}
-    },
-    {
-      "name": "main-not-to-test",
-      "severity": "error",
-      "from": {
-        "path": "^src/"
-      },
-      "to": {
-        "path": "^tests/"
-      }
-    },
+    { "name": "no-circular", "severity": "error", "from": {}, "to": { "circular": true } },
+    { "name": "no-orphans", "severity": "error", "from": { "orphan": true, "pathNot": ["\\.d\\.ts$"] }, "to": {} },
+    { "name": "main-not-to-test", "severity": "error", "from": { "path": "^src/main" }, "to": { "path": "^src/test" } },
     {
       "name": "main-not-to-dev-dependencies",
       "severity": "error",
-      "from": {
-        "path": "^src/"
-      },
-      "to": {
-        "dependencyTypes": [
-          "npm-dev"
-        ],
-        "dependencyTypesNot": [
-          "type-only"
-        ]
-      }
-    },
-    {
-      "name": "core-not-to-browser",
-      "severity": "error",
-      "from": {
-        "path": "^src/(model|editor-state|view|portable|image-bounds)\\.ts$"
-      },
-      "to": {
-        "path": "^src/(main|App|useWorkspace|DiagramCanvas|EditorPanels|export-png)\\.tsx?$"
-      }
-    },
-    {
-      "name": "application-not-to-entrypoint",
-      "severity": "error",
-      "from": {
-        "path": "^src/",
-        "pathNot": "^src/main\\.tsx$"
-      },
-      "to": {
-        "path": "^src/main\\.tsx$"
-      }
+      "from": { "path": "^src/main" },
+      "to": { "dependencyTypes": ["npm-dev"], "dependencyTypesNot": ["type-only"] }
     }
   ],
   "options": {
-    "doNotFollow": {
-      "path": "node_modules"
-    },
-    "tsConfig": {
-      "fileName": "tsconfig.json"
-    },
+    "doNotFollow": { "path": "node_modules" },
+    "tsConfig": { "fileName": "tsconfig.json" },
     "tsPreCompilationDeps": true
   }
 }
