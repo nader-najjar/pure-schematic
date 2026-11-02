@@ -1,14 +1,14 @@
-import globals from 'globals';
 import eslint from '@eslint/js';
 import stylistic from '@stylistic/eslint-plugin';
 import { defineConfig } from 'eslint/config';
-import n from 'eslint-plugin-n';
+import reactHooks from 'eslint-plugin-react-hooks';
+import globals from 'globals';
 import sonarjs from 'eslint-plugin-sonarjs';
 import unicorn from 'eslint-plugin-unicorn';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  { ignores: ['build/**', 'dist/**', 'bazel-*/**', 'node_modules/**'] },
+  { ignores: ['build/**', 'node_modules/**'] },
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,
   tseslint.configs.stylisticTypeChecked,
@@ -23,7 +23,7 @@ export default defineConfig(
   {
     languageOptions: {
       parserOptions: {
-        projectService: { allowDefaultProject: ['eslint.config.js', 'scripts/*.mjs'] },
+        projectService: { allowDefaultProject: ['eslint.config.js'] },
         tsconfigRootDir: import.meta.dirname
       }
     },
@@ -37,25 +37,22 @@ export default defineConfig(
     }
   },
   {
-    files: ['src/**/*.{ts,tsx}', 'tests/**/*.{ts,tsx}'],
+    files: ['src/**/*.{ts,tsx}'],
     languageOptions: { globals: globals.browser },
-    extends: [unicorn.configs.recommended, sonarjs.configs.recommended],
+    extends: [unicorn.configs.recommended, sonarjs.configs.recommended, reactHooks.configs.flat.recommended],
     rules: {
       'unicorn/consistent-boolean-name': 'off',
       'unicorn/consistent-class-member-order': 'off',
       'unicorn/filename-case': 'off',
       'unicorn/name-replacements': 'off',
-      // JSON metadata and browser/React APIs use null as a meaningful value.
+      // Browser and React APIs use null as a meaningful value.
       'unicorn/no-null': 'off'
     }
   },
   {
-    files: ['scripts/*.{ts,mjs}', 'tests/**/*.{ts,tsx}'],
-    extends: [n.configs['flat/recommended-module']],
+    files: ['src/test/**/*.{ts,tsx}'],
     rules: {
-      'n/no-missing-import': 'off',
-      'n/no-unsupported-features/node-builtins': 'off'
+      '@typescript-eslint/unbound-method': 'off'
     }
-  },
-  { files: ['tests/**/*.{ts,tsx}'], rules: { '@typescript-eslint/unbound-method': 'off' } }
+  }
 );

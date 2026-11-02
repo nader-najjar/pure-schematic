@@ -1,106 +1,173 @@
-# Pure Schematic
+# pure-schematic
 
-> A local-first React diagramming template with visual editing and portable HTML, PNG, and JSON exports.
+> A diagramming starter for humans and AI. AI native workflows allow seamless prompt-to-diagram edits, while retaining a cohesive human editing interface. Keep diagrams as code, fully version-controlled in Git, with sharing capabilities including websites, portable files, or presentation-ready images.
 
 ### 1. Prerequisites
 
 ---
 
-**Viewing:** open a supplied HTML viewer. The public demo is unpublished. No account, API key, backend, or installation is needed. The example is illustrative, not a verified architecture. See [verification limits](docs/VERIFICATION.md), including direct offline opening.
+- macOS or Linux on ARM64 or x86-64, as configured in `flake.nix`.
+- Install [Nix](https://nix.dev/install-nix).
+- Windows: use WSL2, follow the [Nix WSL2 installation instructions](https://nix.dev/install-nix), and run the Linux commands inside WSL.
+- Network access for uncached toolchains and dependencies.
 
-**Development:** install [Bazelisk](https://bazel.build/install/bazelisk). `.bazelversion` selects Bazel; `MODULE.bazel` pins Node and pnpm. Run commands from the repository root.
+Run the commands below from the repository root.
+
+Optional shortcut: configure `ub` as an alias for `./universal-build`:
+
+- Zsh/Bash: add `alias ub='./universal-build'` to `~/.zshrc` or `~/.bashrc`.
+- Windows PowerShell: add `function ub { wsl -- bash -lc 'exec ./universal-build "$@"' ub @args }` to `$PROFILE` (uses the default WSL distribution with Nix installed).
+
+Restart your terminal after saving.
 
 ### 2. Build and Test
 
 ---
 
+#### Universal Build Contract
+
+Universal Build expects:
+
+- `universal-build` at the project root.
+- Any version of Nix on `PATH`.
+- `flake.nix` at the project root.
+- `flake.lock` at the project root, except for `clean` and initial `update-toolchain-lock`.
+- A flake input named `nixpkgs`.
+- A development shell named `buildtime`.
+- `buildtime.BUILD_COMMAND` must contain the shell command to run for `build`.
+- `BUILD_COMMAND` must resolve dependencies and enforce dependency locks.
+- `BUILD_COMMAND` must compile the application as needed.
+- `BUILD_COMMAND` must run tests and checks.
+- `BUILD_COMMAND` must stage all deployable files to `build/release/idiomatic-artifacts/`.
+- `buildtime.RELEASE_TYPE` set to `container` or `static`.
+- `buildtime.UPDATE_IDIOMATIC_LOCK_COMMAND` must contain the shell command to refresh dependency locks for `update-idiomatic-lock`.
+- `buildtime.IDE_PATH_VARS` listing space-separated environment variable names for `ide-paths`.
+- Each variable listed in `IDE_PATH_VARS` to be defined in `buildtime`.
+- A root `Dockerfile` for container releases.
+- A flake package named `runtime` for container releases.
+- The runtime package to provide executable named `ignite`.
+- The runtime package to include all runtime dependencies and environment variables.
+- `ignite` to accept the idiomatic artifacts directory as its first argument.
+- `ignite` to execute the software's main() entrypoint based on the language being used.
+
+For `build`, Universal Build recreates `build/release/` and archives its contents as `build/release-artifact.tar.gz`:
+
+- `idiomatic-artifacts/`.
+- `Dockerfile` for container releases.
+- `runtime-artifacts/` for container releases.
+- `symlink-to-absolute-ignite-script` pointing to the runtime package for container releases.
+
 #### Everyday Commands
 
 | Goal | Command |
 | --- | --- |
-| Build the site without checks | `bazel build //:site` |
-| Unit tests with coverage | `bazel test //:unit_tests` |
-| Type check | `bazel test //:typecheck` |
-| Lint | `bazel test //:lint` |
-| Dependency boundaries / unused code | `bazel test //:dependency_boundaries //:unused_code` |
-| Validate diagram JSON | `bazel test //:validate_diagrams` |
-| Full verification | `bazel build //... && bazel test //...` |
-| Local development server | `bazel run //:dev` |
-| Preview production output | `bazel run //:preview` |
-| Clean outputs | `bazel clean` |
-
-Full verification also checks the lockfile and built artifact, and enforces 80% coverage. Preview and artifact checks build the site automatically. Restart the development server after source edits to refresh its declared snapshot.
-
-Run one file or named test without the whole-project coverage gate:
-
-```sh
-bazel test //:unit_tests --test_arg=tests/model.test.ts --test_arg=--coverage.enabled=false
-bazel test //:unit_tests --test_arg=tests/model.test.ts --test_arg=-t --test_arg='roundtrip preserves IDs' --test_arg=--coverage.enabled=false
-```
+| Build, test, check, and package | `./universal-build build` |
+| Remove build outputs | `./universal-build clean` |
+| Print IDE toolchain paths | `./universal-build ide-paths` |
+| Update toolchain lock | `./universal-build update-toolchain-lock` |
+| Refresh application dependency locks | `./universal-build update-idiomatic-lock` |
 
 #### Outputs
 
-- Self-contained site/viewer: `bazel-bin/dist/index.html`.
-- JUnit and coverage reports: `bazel-testlogs/unit_tests/test.outputs/outputs.zip`.
-
-Inspect the actual HTML output in a browser, including direct offline opening and hosting under a subpath. Structural tests do not replace visual review. These build commands do not publish the site.
+- Test results: `build/quality-reports/tests/junit.xml`.
+- Coverage: `build/quality-reports/coverage/index.html` and `build/quality-reports/coverage/lcov.info`.
+- Deployable website: `build/release/idiomatic-artifacts/`.
+- Release archive: `build/release-artifact.tar.gz`.
 
 ### 3. Development Workflows
 
 ---
 
-#### Editing and Sharing Diagrams
+#### Diagram Example
 
-- `diagrams/*.json` is canonical source; keep it in Git. `project.json` supplies the project identity. Give new projects a distinct `recoveryName`.
-- **Open JSON** changes only the browser workspace; it does not upload or commit the file. Browser recovery is not a portable save.
-- **Edit diagram** supports visual changes; **Edit JSON** stages a source replacement. Apply commits the form; Cancel leaves the diagram unchanged.
-- **Download JSON** saves editable source; **Download HTML** saves a self-contained viewer/editor; **Export PNG** captures the whole diagram.
-- Before sharing changes, validate the JSON and inspect rendered labels, overlaps, clipping, and arrow meaning. Preserve before/after renders for meaningful visual changes.
+`diagrams/example.json` uses React Flow's native nodes, edges, and viewport format.
+Edit that file to change the bundled example. The canvas supports dragging, connections,
+and zooming; browser edits last until the page reloads.
+
+This is the initial canvas baseline. [P0 workflows](USER_STORIES.md#p0--local-authoring)
+cover local authoring; P1 adds publishing, sharing and extended recovery.
+
+#### Local Development
+
+Run the development server inside the pinned toolchain after the first build:
+
+```sh
+nix --extra-experimental-features 'nix-command flakes' develop --no-update-lock-file .#buildtime --command pnpm dev
+```
+
+To preview the production build, use the same command with `pnpm preview`.
+
+This template builds static browser assets; Node and Nix are build tools, not runtime requirements. Vite bundles application dependencies into the browser assets. Publishing is P1 and will be connected through the materializer.
 
 #### Dependency Management
 
-Use the pinned pnpm to update `package.json` and `pnpm-lock.yaml`:
+Edit `package.json`:
+
+- Add: declare the package and version in `dependencies` or `devDependencies` (see appendix).
+- Remove: delete the declaration and its usages.
+- Upgrade/pin: change the version or version range.
+
+Refresh locks after adding, removing, or updating dependencies:
 
 ```sh
-bazel run @pnpm -- --dir "$PWD" add --save-exact <package>@<version>
-bazel run @pnpm -- --dir "$PWD" add --save-dev --save-exact <package>@<version>
-bazel run @pnpm -- --dir "$PWD" remove <package>
-bazel mod deps --lockfile_mode=update
+./universal-build update-idiomatic-lock
 ```
-
-Use the add command with a new version to upgrade/pin. Update affected `BUILD.bazel` dependency lists, then build and test. Commit the manifest and lockfiles together. After the IDE install below, trace a dependency with `bazel run @pnpm -- --dir "$PWD" why <package>`.
 
 #### Toolchain Changes
 
-Change Bazel in `.bazelversion`; rules and Node/pnpm in `MODULE.bazel`. Keep `.node-version` and `package.json` declarations aligned. Refresh `MODULE.bazel.lock` with `bazel mod deps --lockfile_mode=update`, then run full verification and refresh IDE paths.
+| Change | Files and steps |
+| --- | --- |
+| Node version | Change `chosenNode` in the buildtime shell in `flake.nix`. Review `@types/node` and TypeScript configuration together. |
+| Add a CLI tool | Add its Nix package to the development shell's `packages` in `flake.nix`. |
+| Nix package set | Change `inputs.nixpkgs.url` in `flake.nix`, then run `./universal-build update-toolchain-lock`. Review and commit `flake.nix` and `flake.lock`. |
+| pnpm version | Change `chosenPnpm` in `flake.nix`; `flake.lock` pins the exact release. |
+
+After toolchain changes, run `./universal-build build`, then run `./universal-build ide-paths` and update the IDE's Node and pnpm paths.
 
 ### 4. IDE Setup
 
 ---
 
-Prepare editor dependencies and print toolchain paths:
+Print the pinned Node and pnpm locations:
 
 ```sh
-bazel build @rules_nodejs//nodejs:current_node_runtime @pnpm//:pkg //:node_modules/typescript
-bazel cquery 'set(@rules_nodejs//nodejs:current_node_runtime @pnpm//:pkg //:node_modules/typescript)' --output=files \
-  | sed "s|^|$(bazel info execution_root)/|"
-bazel run @pnpm//:pnpm -- --dir "$PWD" install --frozen-lockfile
+./universal-build ide-paths
 ```
 
-Follow the [IntelliJ IDEA Ultimate](https://app.notion.com/p/f4c0a2b7875583b79fa5015d58412fea) or [VS Code](https://app.notion.com/p/4fd0a2b787558204a6c001d0b034f698) guide. Use the printed `node` and pnpm `package` paths for JavaScript Runtime, and the TypeScript package’s `lib` directory for the TypeScript SDK, not global installations. Reprint paths after toolchain changes or cache cleanup.
+Use `NODE_BINARY` for Node and `PNPM_BINARY` for pnpm. The TypeScript SDK becomes available after the first `./universal-build build`, at the repository's `node_modules/typescript/lib` directory; use its absolute path.
+
+Configure your IDE using these paths:
+
+- [IntelliJ IDEA Ultimate setup](https://app.notion.com/p/f4c0a2b7875583b79fa5015d58412fea)
+- [Visual Studio Code setup](https://app.notion.com/p/4fd0a2b787558204a6c001d0b034f698)
+
+Reprint the toolchain paths after Nix/toolchain changes.
 
 ### 5. Concepts
 
 ---
 
-- [Document format and source contract](docs/DOCUMENT_FORMAT.md)
-- [Editing, undo, and browser recovery](docs/EDITOR_STATE.md)
-- [Sharing, exports, and privacy](docs/EXPORTS.md)
-- [Publishing and source-commit verification](docs/PUBLISHING.md)
-- [Acceptance evidence and limitations](docs/VERIFICATION.md)
+- [Product Release Pipelines Across Repositories](https://app.notion.com/p/3f90a2b7875581ef953bca201941e0dd)
+- [Deployment Testing and Promotion](https://app.notion.com/p/3f90a2b7875581de812ffaddc1e44b83)
+- [Shutdown Concepts](https://app.notion.com/p/4080a2b78755818a93b6c7ffa13a809d)
+
+### 6. Appendix
+
+---
+
+#### Dependency Declarations
+
+| `package.json` field | Use |
+| --- | --- |
+| `dependencies` | Runtime dependencies |
+| `devDependencies` | Build, test, and editor tools |
+| `optionalDependencies` | Dependencies whose installation may fail |
+| `peerDependencies` | Compatibility requirements for a consuming application's dependencies |
+
+Reference: [pnpm package.json](https://pnpm.io/10.x/package_json).
 
 ### License
 
 ---
 
-All rights reserved. Use, modification, and redistribution require prior written permission, subject to [LICENSE](LICENSE). Dependency licenses remain applicable; they do not grant rights to this repository's material.
+All rights reserved. See [LICENSE](LICENSE).

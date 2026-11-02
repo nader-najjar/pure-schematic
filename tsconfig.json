@@ -1,24 +1,20 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "target": "es2024",
+    "lib": ["es2024", "DOM", "DOM.Iterable"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    "strict": true,
+    "types": ["node", "vite/client"],
+
     "noEmit": true,
-    "skipLibCheck": true,
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "types": [
-      "vite/client",
-      "node"
-    ],
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+
+    "strict": true,
     "exactOptionalPropertyTypes": true,
     "noUncheckedIndexedAccess": true,
     "noPropertyAccessFromIndexSignature": true,
@@ -29,16 +25,9 @@
     "noUnusedParameters": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
+
     "forceConsistentCasingInFileNames": true,
-    "verbatimModuleSyntax": true,
-    "isolatedModules": true,
-    "erasableSyntaxOnly": true
+    "skipLibCheck": true
   },
-  "include": [
-    "src",
-    "scripts",
-    "tests",
-    "vite.config.ts",
-    "vitest.config.ts"
-  ]
+  "include": ["src/**/*", "*.ts"]
 }

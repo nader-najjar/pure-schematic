@@ -1,18 +1,8 @@
 {
   "entry": [
-    "scripts/build-site.mjs",
-    "scripts/run-check.mjs",
-    "scripts/validate-diagrams.ts",
-    "scripts/check-artifact.mjs",
-    "scripts/check-lockfile.mjs",
-    "tests/**/*.test.{ts,tsx}"
+    "src/main/Main.tsx"
   ],
   "project": [
-    "src/**/*.{ts,tsx}",
-    "scripts/*.{ts,mjs}",
-    "tests/**/*.{ts,tsx}"
-  ],
-  "ignoreDependencies": [
-    "dependency-cruiser"
+    "src/**/*.{ts,tsx}"
   ]
 }

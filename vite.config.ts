@@ -1,24 +1,12 @@
-import { defineConfig, type HtmlTagDescriptor } from 'vite';
-import { viteSingleFile } from 'vite-plugin-singlefile';
-import { buildSourceCommit } from './scripts/build-source.ts';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 
-// One self-contained file works at a project subpath and directly from disk.
 export default defineConfig({
+  root: 'src/main',
   base: './',
-  plugins: [
-    viteSingleFile(),
-    {
-      name: 'source-provenance',
-      transformIndexHtml: (): HtmlTagDescriptor[] => [
-        {
-          tag: 'meta',
-          attrs: {
-            name: 'pure-diagramming-source-commit',
-            content: buildSourceCommit(process.env['SOURCE_COMMIT'])
-          },
-          injectTo: 'head'
-        }
-      ]
-    }
-  ]
+  plugins: [react()],
+  build: {
+    outDir: '../../build/release/idiomatic-artifacts',
+    emptyOutDir: true
+  }
 });
