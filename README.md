@@ -78,26 +78,71 @@ For `build`, Universal Build recreates `build/release/` and archives its content
 
 ---
 
-#### Diagram Example
+#### Run the Local Editor
 
-`diagrams/example.json` uses React Flow's native nodes, edges, and viewport format.
-Edit that file to change the bundled example. The canvas supports dragging, connections,
-and zooming; browser edits last until the page reloads.
-
-This is the initial canvas baseline. [P0 workflows](USER_STORIES.md#p0--local-authoring)
-cover local authoring; P1 adds publishing, sharing and extended recovery.
-
-#### Local Development
-
-Run the development server inside the pinned toolchain after the first build:
+After the first build, run the editor inside the pinned toolchain:
 
 ```sh
 nix --extra-experimental-features 'nix-command flakes' develop --no-update-lock-file .#buildtime --command pnpm dev
 ```
 
-To preview the production build, use the same command with `pnpm preview`.
+Open the local URL printed in the terminal. Keep that command running while editing;
+stop it with Ctrl+C when finished. To preview the production build, substitute `pnpm preview`.
+The production build shows `src/main/diagrams/example.json` as a static viewer; publishing is P1
+and will be connected through the materializer.
 
-This template builds static browser assets; Node and Nix are build tools, not runtime requirements. Vite bundles application dependencies into the browser assets. Publishing is P1 and will be connected through the materializer.
+#### Edit and Save a Diagram
+
+1. In **Diagram file**, select or type a filename from the project's `src/main/diagrams/` folder, then click **Open**.
+2. Click **Add node**, drag nodes to arrange them, and drag from one connection handle to another to connect them.
+3. Select a node or connection, edit **Label**, then click **Apply label**. **Cancel** discards the pending label edit.
+4. Use **Delete selected** or Backspace/Delete to remove selected nodes or connections. Removing a node also removes its connections.
+5. Click **Save**. This overwrites the named JSON file in the repository. The status distinguishes unsaved edits from the saved file.
+6. Open the file again to verify its content and saved view. **Fit View** shows the whole diagram on demand.
+7. Run `./universal-build build`, review `git diff`, then commit and push when ready. Saving itself does not commit, push, or publish.
+
+Files use React Flow's native JSON. Selection and measurement state are omitted from
+saved files, while content, layout, supported styling, and additional metadata remain.
+Use plain filenames such as `service-map.json`; nested paths and symlinks are not supported.
+If another tab or an external editor changed the file, Save refuses to replace it. Keep
+your current tab open and compare it with a freshly opened copy before deciding what to keep.
+Opening another diagram prompts before discarding unsaved work, and leaving the page
+warns about unsaved changes. There is no automatic browser-storage backup; commit saved
+work to Git for recovery. Undo/redo and additional recovery tools remain P1.
+
+#### Create a Diagram
+
+Enter an unused filename ending in `.json` in **Diagram file**, then click **New**.
+Add, label, connect, and arrange nodes, then **Save** to create the file in `src/main/diagrams/`.
+An existing filename is never overwritten by a new diagram. Until the first successful
+Save, changing the filename retargets the draft without discarding its contents. Reopen the new file and
+verify it, then build, review the Git diff, and commit or push.
+
+#### Start a Project
+
+Copy this template into your own repository, then clone that repository and run
+`./universal-build build`. Set your project name in `package.json`, the README heading,
+`src/main/index.html`, and the heading in `src/main/execution/App.tsx`; update the package lock
+with `./universal-build update-idiomatic-lock` if package metadata requires it.
+Replace `src/main/diagrams/example.json` with your project diagram, run the local editor, and
+verify it. Finish with `./universal-build build`, review the diff, and commit or push.
+The [license](LICENSE) and dependencies are documented below and in `package.json`.
+
+#### Make an AI Edit
+
+Give the AI the repository, the exact `src/main/diagrams/<name>.json` file, and the requested change.
+Ask it to preserve unrelated IDs, node positions, styling, and unknown metadata, and use
+only React Flow's native format. Supported node types are `default`, `input`, `output`,
+and `group`; supported edges are `default`, `straight`, `step`, `smoothstep`, and
+`simplebezier`. Labels are text or numbers; custom node components require a separate code change.
+
+The workflow is **edit → build → render → inspect → review**:
+
+1. Make the targeted JSON edit. Nodes need unique string IDs, positions and data; edges must reference existing nodes. Group parents must appear before their children in the nodes array.
+2. Run `./universal-build build`. The build validates project diagram files as well as the application.
+3. Start the local editor, open that exact filename, and inspect the rendered result. Check clipping, overlap, labels and connection meaning; use Fit View when useful.
+4. Include before/after screenshots for meaningful visual changes, or state clearly if visual inspection was unavailable.
+5. Review the diagram and Git diff together, then commit or push. Reopen browser tabs after external edits before making further changes there.
 
 #### Dependency Management
 

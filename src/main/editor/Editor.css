@@ -1,0 +1,42 @@
+.editor-panel {
+  max-width: min(42rem, calc(100vw - 3rem));
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  background: #fff;
+  box-shadow: 0 2px 8px #0001;
+}
+
+.editor-panel fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.editor-panel legend {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.editor-panel form, .edit-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.editor-panel label {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.editor-panel input {
+  width: 12rem;
+  max-width: 100%;
+}
+
+.editor-panel [role="status"] {
+  overflow-wrap: anywhere;
+}
